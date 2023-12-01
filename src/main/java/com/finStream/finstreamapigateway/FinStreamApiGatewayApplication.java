@@ -19,7 +19,7 @@ public class FinStreamApiGatewayApplication {
 				.route(p -> p
 						.path("/finStream/user/**")
 								.filters(f -> f
-										.rewritePath("/finStream/(?<segment>.*)",
+										.rewritePath("/finStream/user/(?<segment>.*)",
 														"/${segment}")
 								)
 								.uri("lb://USER-SERVICE")
@@ -27,7 +27,7 @@ public class FinStreamApiGatewayApplication {
 				.route(p -> p
 						.path("/finStream/bank/**")
 						.filters(f -> f
-								.rewritePath("/finStream/(?<segment>.*)",
+								.rewritePath("/finStream/bank/(?<segment>.*)",
 										"/${segment}")
 						)
 						.uri("lb://BANK-SERVICE")
