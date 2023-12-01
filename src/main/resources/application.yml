@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: "gatewayserver"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+
+  cloud:
+    config:
+      enabled: true
+
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lowerCaseServiceId: true
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    web:
+      exposure:
+        include: '*'
+
+
+info:
+  app:
+    name: "gatewayserver"
+    description: "API gateway server for FinStream Application"
+    version: "1.0.0"
