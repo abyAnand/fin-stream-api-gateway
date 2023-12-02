@@ -8,6 +8,13 @@ spring:
     config:
       enabled: true
 
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
+
     gateway:
       discovery:
         locator:
@@ -36,3 +43,9 @@ info:
     name: "gatewayserver"
     description: "API gateway server for FinStream Application"
     version: "1.0.0"
+
+logging:
+  level:
+    com:
+      finStream:
+        finstreamapigateway: DEBUG
