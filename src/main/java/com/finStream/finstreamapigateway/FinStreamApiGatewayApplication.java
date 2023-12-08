@@ -1,6 +1,7 @@
 package com.finStream.finstreamapigateway;
 
 
+import com.finStream.finstreamapigateway.filters.AuthenticationFilter;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.springframework.boot.SpringApplication;
@@ -27,34 +28,67 @@ public class FinStreamApiGatewayApplication {
 	}
 
 	@Bean
-	public RouteLocator finStreamRouteConfig(RouteLocatorBuilder routeLocatorBuilder){
+	public RouteLocator finStreamRouteConfig(RouteLocatorBuilder routeLocatorBuilder, AuthenticationFilter authFilter){
 		return routeLocatorBuilder.routes()
 				.route(p -> p
 						.path("/finStream/user/**")
 								.filters(f -> f
-										.rewritePath("/finStream/user/(?<segment>.*)",
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/user/(?<segment>.*)",
 														"/${segment}")
-										.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
-										.retry(retryConfig -> retryConfig
-												.setRetries(3)
-												.setMethods(HttpMethod.GET)
-												.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+													.setMethods(HttpMethod.GET)
+													.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+//										.requestRateLimiter(
+//												config -> config.setRateLimiter(redisRateLimiter())
+//														.setKeyResolver(userKeyResolver())
+//										)
 										)
+								.uri("lb://USER-SERVICE")
+				)
+				.route(p -> p
+								.path("/finStream/bank/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/bank/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
 //										.requestRateLimiter(
 //												config -> config.setRateLimiter(redisRateLimiter())
 //														.setKeyResolver(userKeyResolver())
 //										)
 								)
-								.uri("lb://USER-SERVICE")
+								.uri("lb://BANK-SERVICE")
 				)
 				.route(p -> p
-						.path("/finStream/bank/**")
-						.filters(f -> f
-								.rewritePath("/finStream/bank/(?<segment>.*)",
-										"/${segment}")
-								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
-						)
-						.uri("lb://BANK-SERVICE")
+								.path("/finStream/auth/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/auth/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+//										.requestRateLimiter(
+//												config -> config.setRateLimiter(redisRateLimiter())
+//														.setKeyResolver(userKeyResolver())
+//										)
+								)
+								.uri("lb://AUTH-SERVICE")
 				)
 				.build();
 	}
