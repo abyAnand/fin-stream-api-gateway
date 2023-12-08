@@ -69,10 +69,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         if (isAdmin) {
             return true; // Admin can access anything
         }
-        if (isBank && path.startsWith("/bank")) {
+        if (isBank && path.startsWith("/finStream/bank")) {
             return true; // Bank role can access /bank
         }
-        if (isUser && path.startsWith("/user")) {
+        if (isUser && path.startsWith("/finStream/user")) {
             return true; // User role can access /user
         }
         if (isGuestAdmin) {

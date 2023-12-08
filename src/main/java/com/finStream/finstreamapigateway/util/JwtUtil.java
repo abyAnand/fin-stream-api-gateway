@@ -26,14 +26,13 @@ public class JwtUtil {
         }catch (Exception e){
             System.out.println("JWT validation error: " + e.getMessage());
         }
-
     }
 
     public List<SimpleGrantedAuthority> getRolesFromToken(final String token) {
         Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
-        List<String> roles = jwsClaims.getBody().get("roles", List.class); // assuming roles are stored in a "roles" claim
+        List<String> roles = jwsClaims.getBody().get("roles", List.class);
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 
