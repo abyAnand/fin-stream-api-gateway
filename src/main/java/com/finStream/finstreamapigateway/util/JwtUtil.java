@@ -21,7 +21,12 @@ public class JwtUtil {
     public static final String SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
     public void validateToken(final String token) {
-        Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
+        try{
+            Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
+        }catch (Exception e){
+            System.out.println("JWT validation error: " + e.getMessage());
+        }
+
     }
 
     public List<SimpleGrantedAuthority> getRolesFromToken(final String token) {
