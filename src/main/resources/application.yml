@@ -4,9 +4,22 @@ spring:
   config:
     import: "optional:configserver:http://localhost:8071/"
 
+#  main:
+#    web-application-type: none
+
   cloud:
     config:
       enabled: true
+
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
 
   data:
     redis:
@@ -22,20 +35,6 @@ spring:
           lowerCaseServiceId: true
 
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    gateway:
-      enabled: true
-  info:
-    env:
-      enabled: true
-    web:
-      exposure:
-        include: '*'
 
 
 info:

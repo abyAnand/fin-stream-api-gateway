@@ -44,9 +44,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     try {
                         List<SimpleGrantedAuthority> roles = jwtUtil.getRolesFromToken(authHeader);
 
-                        if (!isAuthorizedForRoute(request, roles)) {
-                            return forbiddenResponse(exchange.getResponse());
-                        }
+//                        if (!isAuthorizedForRoute(request, roles)) {
+//                            return forbiddenResponse(exchange.getResponse());
+//                        }
 
                     } catch (Exception e) {
                         return forbiddenResponse(exchange.getResponse());
@@ -69,7 +69,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         if (isAdmin) {
             return true; // Admin can access anything
         }
-        if (isBank && path.startsWith("/finStream/bank")) {
+        if (isBank && isUser && path.startsWith("/finStream/bank")) {
             return true; // Bank role can access /bank
         }
         if (isUser && path.startsWith("/finStream/user")) {

@@ -36,7 +36,6 @@ public class FinStreamApiGatewayApplication {
 												.filter(authFilter.apply(new AuthenticationFilter.Config()))
 												.rewritePath("/finStream/user/(?<segment>.*)",
 														"/${segment}")
-
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
@@ -69,6 +68,46 @@ public class FinStreamApiGatewayApplication {
 //										)
 								)
 								.uri("lb://BANK-SERVICE")
+				)
+				.route(p -> p
+								.path("/finStream/account/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/account/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+//										.requestRateLimiter(
+//												config -> config.setRateLimiter(redisRateLimiter())
+//														.setKeyResolver(userKeyResolver())
+//										)
+								)
+								.uri("lb://ACCOUNT-SERVICE")
+				)
+				.route(p -> p
+								.path("/finStream/loan/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/loan/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+//										.requestRateLimiter(
+//												config -> config.setRateLimiter(redisRateLimiter())
+//														.setKeyResolver(userKeyResolver())
+//										)
+								)
+								.uri("lb://LOAN-SERVICE")
 				)
 				.route(p -> p
 								.path("/finStream/auth/**")
