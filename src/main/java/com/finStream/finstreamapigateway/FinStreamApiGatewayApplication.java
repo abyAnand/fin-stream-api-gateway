@@ -37,15 +37,17 @@ public class FinStreamApiGatewayApplication {
 												.rewritePath("/finStream/user/(?<segment>.*)",
 														"/${segment}")
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("user-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
 													.setMethods(HttpMethod.GET)
 													.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
 												)
-//										.requestRateLimiter(
-//												config -> config.setRateLimiter(redisRateLimiter())
-//														.setKeyResolver(userKeyResolver())
-//										)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
 										)
 								.uri("lb://USER-SERVICE")
 				)
@@ -57,15 +59,17 @@ public class FinStreamApiGatewayApplication {
 														"/${segment}")
 
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("bank-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
 														.setMethods(HttpMethod.GET)
 														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
 												)
-//										.requestRateLimiter(
-//												config -> config.setRateLimiter(redisRateLimiter())
-//														.setKeyResolver(userKeyResolver())
-//										)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
 								)
 								.uri("lb://BANK-SERVICE")
 				)
@@ -77,15 +81,17 @@ public class FinStreamApiGatewayApplication {
 														"/${segment}")
 
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("account-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
 														.setMethods(HttpMethod.GET)
 														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
 												)
-//										.requestRateLimiter(
-//												config -> config.setRateLimiter(redisRateLimiter())
-//														.setKeyResolver(userKeyResolver())
-//										)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
 								)
 								.uri("lb://ACCOUNT-SERVICE")
 				)
@@ -97,15 +103,17 @@ public class FinStreamApiGatewayApplication {
 														"/${segment}")
 
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("loan-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
 														.setMethods(HttpMethod.GET)
 														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
 												)
-//										.requestRateLimiter(
-//												config -> config.setRateLimiter(redisRateLimiter())
-//														.setKeyResolver(userKeyResolver())
-//										)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
 								)
 								.uri("lb://LOAN-SERVICE")
 				)
@@ -117,17 +125,63 @@ public class FinStreamApiGatewayApplication {
 														"/${segment}")
 
 												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("auth-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
 												.retry(retryConfig -> retryConfig
 														.setRetries(3)
 														.setMethods(HttpMethod.GET)
 														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
 												)
-//										.requestRateLimiter(
-//												config -> config.setRateLimiter(redisRateLimiter())
-//														.setKeyResolver(userKeyResolver())
-//										)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
 								)
 								.uri("lb://AUTH-SERVICE")
+				)
+				.route(p -> p
+								.path("/finStream/transaction/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/transaction/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("transaction-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
+								)
+								.uri("lb://TRANSACTION-SERVICE")
+				)
+				.route(p -> p
+								.path("/finStream/notification/**")
+								.filters(f -> f
+												.filter(authFilter.apply(new AuthenticationFilter.Config()))
+												.rewritePath("/finStream/notification/(?<segment>.*)",
+														"/${segment}")
+
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+												.circuitBreaker(config -> config.setName("notification-CircuitBreaker")
+														.setFallbackUri("forward:/contactSupport"))
+												.retry(retryConfig -> retryConfig
+														.setRetries(3)
+														.setMethods(HttpMethod.GET)
+														.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+												)
+										.requestRateLimiter(
+												config -> config.setRateLimiter(redisRateLimiter())
+														.setKeyResolver(userKeyResolver())
+										)
+								)
+								.uri("lb://NOTIFICATION-SERVICE")
 				)
 				.build();
 	}
@@ -147,19 +201,19 @@ public class FinStreamApiGatewayApplication {
 	}
 
 
-//	@Bean
-//	public RedisRateLimiter redisRateLimiter(){
-//		return new RedisRateLimiter(1,1,1);
-//	}
-//
-//	@Bean
-//	KeyResolver userKeyResolver(){
-//		return exchange -> Mono
-//				.justOrEmpty(
-//						exchange.getRequest().getHeaders().getFirst("user")
-//				)
-//				.defaultIfEmpty("anonymous");
-//	}
+	@Bean
+	public RedisRateLimiter redisRateLimiter(){
+		return new RedisRateLimiter(1,1,1);
+	}
+
+	@Bean
+	KeyResolver userKeyResolver(){
+		return exchange -> Mono
+				.justOrEmpty(
+						exchange.getRequest().getHeaders().getFirst("user")
+				)
+				.defaultIfEmpty("anonymous");
+	}
 
 
 
