@@ -1,0 +1,4 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-0.eureka-service.default.svc.cluster.local:8761/eureka
