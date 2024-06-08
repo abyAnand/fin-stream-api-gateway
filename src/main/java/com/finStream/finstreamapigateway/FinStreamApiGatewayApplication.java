@@ -183,6 +183,27 @@ public class FinStreamApiGatewayApplication {
 								)
 								.uri("lb://NOTIFICATION-SERVICE")
 				)
+				.route(p -> p
+						.path("/finStream/admin/**")
+						.filters(f -> f
+								.filter(authFilter.apply(new AuthenticationFilter.Config()))
+								.rewritePath("/finStream/admin/(?<segment>.*)",
+										"/${segment}")
+								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+								.circuitBreaker(config -> config.setName("admin-CircuitBreaker")
+										.setFallbackUri("forward:/contactSupport"))
+								.retry(retryConfig -> retryConfig
+										.setRetries(3)
+										.setMethods(HttpMethod.GET)
+										.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000),2,true)
+								)
+								.requestRateLimiter(
+										config -> config.setRateLimiter(redisRateLimiter())
+												.setKeyResolver(userKeyResolver())
+								)
+						)
+						.uri("lb://ADMIN-SERVICE")
+				)
 				.build();
 	}
 
